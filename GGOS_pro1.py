@@ -26,9 +26,12 @@ class data():
     Omega_n = 7.2921151467064*10**(-5)
 
 
-    def __init__(self):
-        pass
+    def __init__(self, iter_isdc = 0):
+        self.iter_isdc = iter_isdc
     
+    def set_iter_isdc(self, iter_isdc):
+        self.iter_isdc = iter_isdc
+        
     def read_given_txt(self, path, filename):
         facts = []
         years = []
@@ -48,7 +51,9 @@ class data():
     def read_isdc_files(self, path, years = ['2005', '2006', '2007', '2008',
                                                  '2009', '2010', '2011', '2012',
                                                  '2013', '2014', '2015'] ):
-        line = []
+        temp_years = []
+        years_mjd = []
+        facts = []
         for y in years:
             if path == "AAM":
                 path_folder = "./AAM/"
@@ -70,22 +75,45 @@ class data():
                     k_o = file[k].split()
                     try:                                # weil str !>> int
                         if k_o[0] in years:
-                            line.append(k_o)
+                            temp_years.append(float(k_o[0]))
+                            years_mjd.append(k_o[4])
+                            facts.append(k_o[5::])
                     except:
                         continue
-        self.facts_isdc = np.array(line).astype(float)
+        self.facts_isdc = np.array(facts).astype(float)
+        self.years_isdc = temp_years
+        self.years_mjd_isdc =years_mjd
+        
                     
     def getter(self, isdc_tc, year, iterator):
         """ isdc_tc >>> Datei vom TC oder von ISDC
             year >>> Index 1. Wert des Jahres
             iterator >>> year + iterator >>> POS """
+    
         if isdc_tc == "tc":
             index_year = self.years_tc.index(year)
             pos = index_year + iterator
-            
-        elif isdc_tc == "isdc":
-            pass
+            if self.years_tc[pos] == year:
+                corrent_line = self.facts_tc[pos][1::]
+            else:                
+                return 0      
         
+        elif isdc_tc == "isdc":
+            index_year = self.years_isdc.index(year)
+            pos = index_year + self.iter_isdc
+            if pos <= self.facts_isdc.shape[0]-1 and self.years_isdc[pos] == year  :
+                if (iterator%3) == 0:
+                    pos = index_year + self.iter_isdc               
+                elif (iterator%3) == 1:
+                    pos = index_year + self.iter_isdc
+                elif (iterator%3) == 2:
+                    pos = index_year + self.iter_isdc
+                    self.set_iter_isdc(self.iter_isdc + 1)
+            else:
+                return 0
+            corrent_line = self.facts_isdc[pos,:]
+
+        return corrent_line
         
 
                 
@@ -95,9 +123,14 @@ class data():
 
 test = data()
 test.read_given_txt("./lab01_data/",  "potentialCoefficientsTides.txt")
-test.read_isdc_files("OAM", ['2005', '2006', '2010'])  
+test.read_isdc_files("OAM", ['2005'])  
     
-test.getter("tc", 2006, 0)
+p = np.zeros([9000, 5])
+g = np.zeros([9000, 6])
+for i in range(9000):
+    p[i,:] = test.getter("tc", 2005, i)
+    g[i,:] = test.getter("isdc", 2005, i)
+    
 
 
 
