@@ -5,6 +5,75 @@ Spyder Editor
 Dies ist eine temporäre Skriptdatei.
 """
 
+import numpy as np
+import julian as ju
+import matplotlib.pyplot as plt
+import sys
+import os
+import math as m
+print(sys.version)
+
+class Data():
+
+
+    def __init__(self,):
+        self.read_isdc_files()
+
+    
+    
+    def read_isdc_files(self, path = ["./AAM/", "./HAM/", "./OAM/", "./SLAM/"]):
+        facts = []
+        years = ['2005', '2006', '2007', '2008', '2009',
+                 '2010', '2011', '2012', '2013', '2014', '2015']
+        for p in path:
+            for i in os.listdir(p):
+                with open(p + i, 'r') as f:
+                    file = f.read().splitlines()
+                    header = 0
+                    for k in range(0, len(file)):
+                        k_o = file[k].split()
+                        if len(k_o) != 0 and k_o[0] in years:
+                            facts.append(k_o)
+                        else:
+                            header += 1
+                            
+            if p == "./AAM/":
+                self.aam_ = np.asarray(facts).astype(float)
+            if p == "./HAM/":
+                self.ham_ = np.asarray(facts).astype(float)
+            if p == "./OAM/":
+                self.oam_ = np.asarray(facts).astype(float)
+            if p == "./SLAM/":
+                self.slam_ = np.asarray(facts).astype(float)
+                
+            facts.clear()
+        
+test = Data()
+
+
+
+x = np.linspace(0,87649, 4017, endpoint = True)
+y = test.ham_[:,5]
+
+val = np.linspace(0,87649, 87649, endpoint = True, dtype = int)
+
+
+yinterp = np.interp(val, x, y)
+
+fig, ax = plt.subplots(1)
+fig.suptitle('slam')
+ax.set_title('Anzahl der verliehenen Fahrräder')
+plt.plot(val, yinterp, linewidth = 0.25, color = 'hotpink', marker = '.')
+plt.plot(x, y ,'b+', linewidth = 0.1)
+        
+        
+# -*- coding: utf-8 -*-
+"""
+Spyder Editor
+
+Dies ist eine temporäre Skriptdatei.
+"""
+
 
 import numpy as np
 import julian as ju
@@ -41,11 +110,11 @@ class data():
                 file = f.read().splitlines()
                 for k in range(2,len(file)-1):
                     temp_file = file[k].split()
-                    facts.append(temp_file)
-                    if i == 'moon.txt':
-                        temp_years = ju.from_jd(float(temp_file[0]), fmt = 'mjd')
-                        self.years_tc.append(temp_years.year)
+                    temp_years = ju.from_jd(float(temp_file[0]), fmt = 'mjd')
                     
+                if i[:-4] == 'moon':
+                    self.years_tc.append(temp_years.year)
+                    self.moon = facts.append(temp_file)  
                 if i[:-4] == "potentialCoefficientsAOHIS":
                     self.pc_aohis_ = np.asarray(facts).astype(float)
                 if i[:-4] == 'potentialCoefficientsTides':
@@ -56,15 +125,15 @@ class data():
                     self.moon_ = np.asarray(facts).astype(float)
                 if i[:-4] =='sun':
                     self.sun_ = np.asarray(facts).astype(float)
+                
                 facts.clear()
-
 
     
     
     def read_isdc_files(self, path = ["./AAM/", "./HAM/", "./OAM/", "./SLAM/"]):
         facts = []
         years = ['2005', '2006', '2007', '2008', '2009',
-                 '2010', '2011', '2012', '2013', '2014']
+                 '2010', '2011', '2012', '2013', '2014', '2015']
         for p in path:
             for i in os.listdir(p):
                 with open(p + i, 'r') as f:
@@ -78,40 +147,19 @@ class data():
                             header += 1
                             
             if p == "./AAM/":
-                self.aam_f = np.asarray(facts).astype(float)
+                self.aam = np.asarray(facts).astype(float)
             if p == "./HAM/":
-                self.ham_f = np.asarray(facts).astype(float)
+                self.ham = np.asarray(facts).astype(float)
             if p == "./OAM/":
-                self.oam_f = np.asarray(facts).astype(float)
+                self.oam = np.asarray(facts).astype(float)
             if p == "./SLAM/":
-                self.slam_f = np.asarray(facts).astype(float)
-            facts.clear()
-            
-    def interpolate(self):
-        self.aam_ = np.zeros([87649, 6])
-        self.oam_ = np.zeros([87649, 6])
-        self.ham_ = np.zeros([87649, 6])
-        self.slam_ = np.zeros([87649, 3])
-        
-        isdc = [self.aam_f, self.oam_f, self.ham_f, self.slam_f]
-        for i in isdc:
-            copy = i[:,5::]
-            
-            size = copy.shape
-            x = np.linspace(0, 87649, size[0], endpoint = True, dtype = int)
-            for j in range(size[1]):
-                y = copy[:,j]
-                val = np.linspace(0,87649, 87649, endpoint = True, dtype = int)
-                yinterp = np.interp(val, x, y)
-                if i[0,-1] == self.aam_f[0,-1]:
-                    self.aam_[:,j] = yinterp
-                if i[0,-1] == self.oam_f[0,-1]:
-                    self.oam_[:,j] = yinterp
-                if i[0,-1] == self.ham_f[0,-1]:
-                    self.ham_[:,j] = yinterp
-                if i[0,-1] == self.slam_f[0,-1]:
-                    self.slam_[:,j] = yinterp
+                self.slam = np.asarray(facts).astype(float)
                 
+            facts.clear()
+    def interpolate(self):
+        isdc = [self.aam, self.oam, self.ham, self.slam]
+        for i in isdc:
+            size = i.shape
         
     def getter_tc(self, year, indizes, file):
         index_year = self.years_tc.index(year)
@@ -120,8 +168,9 @@ class data():
         return corrent_line      
         
     def getter_isdc_3H(self, year, indizes, file):
-        index_year = self.years_tc.index(year)
-        pos = index_year + indizes
+        years_isdc = file[:,0].tolist()
+        index_year = years_isdc.index(year)
+        pos = index_year + indizes   
         corrent_line = file[pos,:]           
 #        corrent_line = file[pos,5::]
         return corrent_line
@@ -147,47 +196,46 @@ class data():
         return self.getter_tc(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.pc_tides_)
     
     def aam(self, hour_since_2005):
-        offset = 8760
-        return self.getter_isdc_3H(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.aam_)
+        offset = 2920
+        return self.getter_isdc_3H(2005+int(np.floor(hour_since_2005/offset)), int(np.floor(hour_since_2005/3)) % offset, self.aam_)
 
     def aom(self, hour_since_2005):
-        offset = 8760
-        return self.getter_isdc_3H(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.oam_)
+        offset = 2920
+        return self.getter_isdc_3H(2005+int(np.floor(hour_since_2005/offset)), int(np.floor(hour_since_2005/3))% offset, self.aom_)
     
     def ham(self, hour_since_2005):
-        offset = 8760
-        return self.getter_isdc_3H(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.ham_)
+        offset = 365
+        return self.getter_isdc_3H(2005+int(np.floor(hour_since_2005/offset)), int(np.floor(hour_since_2005/24))% offset, self.ham_)
 
     def slam(self, hour_since_2005):
-        offset = 8760
-        return self.getter_isdc_3H(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.slam_)
+        offset = 365
+        return self.getter_isdc_3H(2005+int(np.floor(hour_since_2005/offset)), int(np.floor(hour_since_2005/24))% offset, self.slam_)
 
 #sun.txt    moon.txt     earthRotationVector.txt      
 #potentialCoefficientsAOHIS.txt     potentialCoefficientsTides.txt
 
 test = data()
-z = 20000
-a = np.zeros([z, 3])
-b = np.zeros([z, 3])
-c = np.zeros([z, 3])
-d = np.zeros([z, 5])
-e = np.zeros([z, 5])
-
-f = np.zeros([z, 6])
-g = np.zeros([z, 6])
-h = np.zeros([z, 6])
-j = np.zeros([z, 3])
-for i in range(20000):
-    a[i,:] = np.transpose(test.moon(i))
-    b[i,:] = np.transpose(test.sun(i))
-    c[i,:] = np.transpose(test.earth_rottation(i))
-    d[i,:] = np.transpose(test.pc_aohis(i))
-    e[i,:] = np.transpose(test.pc_tide(i))
-    
-    f[i,:] = np.transpose(test.aam(i))
-    g[i,:] = np.transpose(test.aom(i))
-    h[i,:] = np.transpose(test.ham(i))
-    j[i,:] = np.transpose(test.slam(i))
+#z = 10000
+#s = 12
+#a = np.zeros([z, 3])
+#b = np.zeros([z, 3])
+#c = np.zeros([z, 3])
+#d = np.zeros([z, 5])
+#e = np.zeros([z, 5])
+#f = np.zeros([z, 6])
+#g = np.zeros([z, s])
+#h = np.zeros([z, s])
+#j = np.zeros([z, 3])
+#for i in range(10000):
+#    a[i,:] = np.transpose(test.moon(i))
+#    b[i,:] = np.transpose(test.sun(i))
+#    c[i,:] = np.transpose(test.earth_rottation(i))
+#    d[i,:] = np.transpose(test.pc_aohis(i))
+#    e[i,:] = np.transpose(test.pc_tide(i))
+#    f[i,:] = np.transpose(test.aam(i))
+##    g[i,:] = test.aom(i)
+##    h[i,:] = test.ham(i)
+##    j[i,:] = np.transpose(test.slam(i))
   
 
 
@@ -338,4 +386,26 @@ for i in range(20000):
 
 
 
-   
+           
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
