@@ -7,12 +7,17 @@ import sys
 import numpy as np
 import GGOS_pro1 as g_data
 import ggosPlot as g_plot
-
+import ggos_erm as erm
 
 def main(argv=sys.argv):
     # read test data
     test_data = g_data.data()
-
+    test_erm = erm.RotationModell(test_data)
+    print(test_erm.m_of_t(1))
+    
+    
+    
+    
     z = 500
     a = np.zeros([z, 3])
     b = np.zeros([z, 3])
@@ -45,9 +50,9 @@ def main(argv=sys.argv):
     second_test_plot.show()
 
     # plot test data animated and save as video
-    arr2Df = np.delete(f, [2, 3, 4, 5], axis=1)  # use only first 2 columns
-    third_test_plot = g_plot.GgosPlot(arr2Df, plot_range)
-    third_test_plot.animate(0.5, True, 100)
+#    arr2Df = np.delete(f, [2, 3, 4, 5], axis=1)  # use only first 2 columns
+#    third_test_plot = g_plot.GgosPlot(arr2Df, plot_range)
+#    third_test_plot.animate(0.5, True, 100)
 
 
 if __name__ == "__main__":
