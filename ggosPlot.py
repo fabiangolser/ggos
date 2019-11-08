@@ -2,10 +2,14 @@
 
 This is the class used to plot the results.
 Inspired by https://stackoverflow.com/questions/16132798/python-animation-graph
+
+TODO: 3D https://jakevdp.github.io/PythonDataScienceHandbook/04.12-three-dimensional-plotting.html
 """
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from mpl_toolkits.mplot3d import Axes3D
 
 
 class GgosPlot:
@@ -14,18 +18,31 @@ class GgosPlot:
         self.__data = data
         self.__plot_range = plot_range
         self.__fig = plt.figure(figsize=(20, 12))
+        self.__length = np.shape(self.__data)[0]
+
+        not_init_line = True
 
         if self.__data.ndim == 1:
-            self.__length = len(self.__data)
+            print('1-dimensional plot: ', np.shape(self.__data))
             self.__ax = plt.axes(xlim=(0, self.__length), ylim=(np.min(self.__data), np.max(self.__data)))
-        elif self.__data.ndim == 2:
+        elif np.shape(self.__data)[1] == 2:
             print('2-dimensional plot: ', np.shape(self.__data))
-            self.__length = len(self.__data[:, 0])
             self.__ax = plt.axes(xlim=(np.min(self.__data[:, 0]), np.max(self.__data[:, 0])),
                                  ylim=(np.min(self.__data[:, 1]), np.max(self.__data[:, 1])))
             # self.__line_2, = self.__ax.plot([], [], lw=1, color="r")
+        elif np.shape(self.__data)[1] == 3:
+            print('3-dimensional plot: ', np.shape(self.__data))
+            mpl.rcParams['legend.fontsize'] = 10
+            self.__ax = self.__fig.gca(projection='3d')
+            not_init_line = False
+        else:
+            print('dimension too high to plot: ', np.shape(self.__data))
+            exit(-1)
 
-        self.__line, = self.__ax.plot([], [], lw=2)
+        if not_init_line:
+            self.__line, = self.__ax.plot([], [], lw=2)
+        else:
+            self.__line, = self.__ax.plot([], [], [], lw=2)
 
     def plot(self, block=False, show=True):
         # fig = plt.figure(figsize=(20, 12))
@@ -34,9 +51,17 @@ class GgosPlot:
         # self.__line_2, = ax.plot([], [], lw=1, color="r")
         if self.__data.ndim == 1:
             plt.plot(range(0, self.__length), self.__data, 'b')
-        elif self.__data.ndim == 2:
+        elif np.shape(self.__data)[1] == 2:
             plt.plot(self.__data[:, 0], self.__data[:, 1], 'b')
-        # plt.plot(range(0, 9000), part_data_2/5, 'r')
+            # plt.plot(range(0, 9000), part_data_2/5, 'r')
+        elif np.shape(self.__data)[1] == 3:
+            # https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html
+            x = self.__data[:, 0]
+            y = self.__data[:, 1]
+            z = self.__data[:, 2]
+            self.__ax.plot(x, y, z, label='parametric curve')
+            self.__ax.legend()
+            #plt.show()
         if show:
             plt.show(block=block)
 
