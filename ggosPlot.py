@@ -1,4 +1,5 @@
-"""GGOS Lab.
+"""
+GGOS Lab
 
 This is the class used to plot the results.
 Inspired by https://stackoverflow.com/questions/16132798/python-animation-graph
@@ -67,7 +68,12 @@ class GgosPlot:
 
     def __init_plot(self):
         # initialization function: plot the background of each frame
-        self.__line.set_data([], [])
+        if self.__data.ndim == 1:
+            self.__line.set_data([], [])
+        elif np.shape(self.__data)[1] == 2:
+            self.__line.set_data([], [])
+        elif np.shape(self.__data)[1] == 3:
+            self.__line.set_data([], [], [])
         return self.__line,
 
     def __animate(self, i):
@@ -81,10 +87,16 @@ class GgosPlot:
         if self.__data.ndim == 1:
             x = range(plot_start, plot_end)
             y = self.__data[plot_start:plot_end]
-        elif self.__data.ndim == 2:
+            self.__line.set_data(x, y)
+        elif np.shape(self.__data)[1] == 2:
             x = self.__data[:, 0][plot_start:plot_end]
             y = self.__data[:, 1][plot_start:plot_end]
-        self.__line.set_data(x, y)
+            self.__line.set_data(x, y)
+        elif np.shape(self.__data)[1] == 3:
+            x = self.__data[:, 0][plot_start:plot_end]
+            y = self.__data[:, 1][plot_start:plot_end]
+            z = self.__data[:, 2][plot_start:plot_end]
+            self.__line.set_data(x, y, z)
         # y_2 = part_data_2[plot_start:plot_end]
         # __line_2.set_data(x, y_2 / 5)
         return self.__line,  # __line_2,

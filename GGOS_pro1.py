@@ -1,20 +1,15 @@
-# -*- coding: utf-8 -*-
 """
-Spyder Editor
+GGOS Lab
 
-Dies ist eine temporäre Skriptdatei.
+This is the class used encapsulates the data.
+All data is read from different files and stored inside this class.
 """
-
-
 import numpy as np
 import julian as ju
-import matplotlib.pyplot as plt
-import sys
 import os
-import math as m
-print(sys.version)
 
-class data():
+
+class Data:
     G = 6.674*10**(-11)
     k_Re = 0.3077
     k_Im = 0.0036
@@ -26,12 +21,21 @@ class data():
     C_strich = 0.3307007 * M_earth * R_earth**2
     Omega_n = 7.2921151467064*10**(-5)
 
-
     def __init__(self,):
         self.read_given_txt()
         self.read_isdc_files()
         self.interpolate()
-        
+        self.w = np.array([self.earth_rottation(0), ])
+        self.w_dot = np.array([[0, 0, 0], ])    # maybe not initialized correct yet
+
+    def append_w(self, w_new):
+        """appends the current w(x, y, z)"""
+        self.w = np.append(self.w, [w_new], axis=0)
+
+    def append_w_dot(self, w_dot_new):
+        """appends the current w_dot(x, y, z)"""
+        self.w_dot = np.append(self.w_dot, [w_dot_new], axis=0)
+
     def read_given_txt(self):
         facts = []
         self.years_tc = []
@@ -58,9 +62,6 @@ class data():
                     self.sun_ = np.asarray(facts).astype(float)
                 facts.clear()
 
-
-    
-    
     def read_isdc_files(self, path = ["./AAM/", "./HAM/", "./OAM/", "./SLAM/"]):
         facts = []
         years = ['2005', '2006', '2007', '2008', '2009',
@@ -111,8 +112,7 @@ class data():
                     self.ham_[:,j] = yinterp
                 if i[0,-1] == self.slam_f[0,-1]:
                     self.slam_[:,j] = yinterp
-                
-        
+
     def getter_tc(self, year, indizes, file):
         index_year = self.years_tc.index(year)
         pos = index_year + indizes
@@ -161,181 +161,3 @@ class data():
     def slam(self, hour_since_2005):
         offset = 8760
         return self.getter_isdc_3H(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.slam_)
-
-#sun.txt    moon.txt     earthRotationVector.txt      
-#potentialCoefficientsAOHIS.txt     potentialCoefficientsTides.txt
-
-test = data()
-z = 20000
-a = np.zeros([z, 3])
-b = np.zeros([z, 3])
-c = np.zeros([z, 3])
-d = np.zeros([z, 5])
-e = np.zeros([z, 5])
-
-f = np.zeros([z, 6])
-g = np.zeros([z, 6])
-h = np.zeros([z, 6])
-j = np.zeros([z, 3])
-for i in range(20000):
-    a[i,:] = np.transpose(test.moon(i))
-    b[i,:] = np.transpose(test.sun(i))
-    c[i,:] = np.transpose(test.earth_rottation(i))
-    d[i,:] = np.transpose(test.pc_aohis(i))
-    e[i,:] = np.transpose(test.pc_tide(i))
-    
-    f[i,:] = np.transpose(test.aam(i))
-    g[i,:] = np.transpose(test.aom(i))
-    h[i,:] = np.transpose(test.ham(i))
-    j[i,:] = np.transpose(test.slam(i))
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   
