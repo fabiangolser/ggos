@@ -5,14 +5,17 @@ This is the class represent the rotation model of the earth.
 All computation is done in this class.
 """
 import numpy as np
+from numpy.core.multiarray import ndarray
+
 import GGOS_pro1 as g_data
 
 
 class RotationModel:
-
     def __init__(self, data):
         self.__data = data
         self.__index = 0
+        self.__t_total_current = np.zeros([3, 3])
+        self.__t_total_last = np.zeros([3, 3])
 
     def m_of_t(self, j):
         """ Fromel!!!!!!!!!! """
@@ -75,13 +78,16 @@ class RotationModel:
 
     def t_total(self):
         """ T(t) = T_G(t) + T_R(t) """
-        return self.tg_of_t() + self.tr_of_t()
+        self.__t_total_last = self.__t_total_current
+        self.__t_total_current = self.tg_of_t() + self.tr_of_t()
+        return self.__t_total_current
 
     def h_it_self(self):
         pass
 
-    def delta_t(self):
-        pass
+    def delta_tg(self):
+        delta_tg = self.__t_total_current - self.__t_total_last
+        return delta_tg
 
     def delta_h(self):
         pass
@@ -90,11 +96,33 @@ class RotationModel:
         self.__index = index
         w_dot = np.array([0, 0, 0])
 
-        t_total = self.t_total()
-        print('t_total = \n{}'.format(t_total))
+        w = self.__data.w
+        print('w({}) = \n{}'.format(index, w))
+        DT_G = self.delta_tg()
+        print('DT_G({}) = \n{}'.format(index, DT_G))
+        T = self.t_total()
+        print('T({}) = \n{}'.format(index, T))
 
-        self.__data.append_w_dot(w_dot)
-        print('w_dot = \n{}'.format(self.__data.w_dot))
+        """ (D*T_G/Dt) * w """
+        DT_G_Dt_w = np.dot(DT_G, np.transpose(w))
+        print('(D*T_G/Dt) * w({}) = \n{}'.format(index, DT_G_Dt_w))
+
+        """ w x (T * w) """
+        Tw = np.dot(T, np.transpose(w))
+        w_x_Tw = np.transpose(np.cross(w, np.transpose(Tw)))
+        print('w x (T * w)({}) = \n{}'.format(index, w_x_Tw))
+
+        """ w_dot = F^(-1) * [M - ((D*T_G/Dt) * w) - (w x (T * w)) - (w x h) - (D_h/Dt)] """
+        """ w_dot = F^(-1) * [M - (DT_G_Dt_w)      - (w_x_Tw)      - (w x h) - (D_h/Dt)] """
+        w_dot     =               (DT_G_Dt_w)      - (w_x_Tw)
+        print('w_dot({}) = \n{}'.format(index, w_dot))
+
+        w_dot = np.transpose(w_dot)
+        if self.__index == 0:
+            self.__data.w_dot = w_dot
+        else:
+            self.__data.append_w_dot(w_dot)
+
         return w_dot
 
     def polar_motion(self, index, use_ref=False):

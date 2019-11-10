@@ -30,11 +30,11 @@ class Data:
 
     def append_w(self, w_new):
         """appends the current w(x, y, z)"""
-        self.w = np.append(self.w, [w_new], axis=0)
+        self.w = np.append(self.w, w_new, axis=0)
 
     def append_w_dot(self, w_dot_new):
         """appends the current w_dot(x, y, z)"""
-        self.w_dot = np.append(self.w_dot, [w_dot_new], axis=0)
+        self.w_dot = np.append(self.w_dot, w_dot_new, axis=0)
 
     def read_given_txt(self):
         facts = []

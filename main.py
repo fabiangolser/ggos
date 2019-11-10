@@ -87,6 +87,8 @@ def test_calculation(data):
     len_max = 87649 - 8760
     test_erm = erm.RotationModel(data)
 
+    test_erm.omega_dot(0)
+
     polar = test_erm.polar_motion(0)
     polar_ref = test_erm.polar_motion(0)
     for index in range(0, int(len_max/20)):
