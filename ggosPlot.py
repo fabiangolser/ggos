@@ -15,15 +15,17 @@ from mpl_toolkits.mplot3d import Axes3D
 
 class GgosPlot:
 
-    def __init__(self, data, plot_range):
+    def __init__(self, data, plot_range=0):
         self.__data = data
+        if plot_range == 0:
+            plot_range = len(self.__data[0])
         self.__plot_range = plot_range
         self.__fig = plt.figure(figsize=(20, 12))
         self.__length = np.shape(self.__data)[0]
 
         not_init_line = True
 
-        if self.__data.ndim == 1:
+        if (isinstance(self.__data, list)) or (self.__data.ndim == 1):
             print('1-dimensional plot: ', np.shape(self.__data))
             self.__ax = plt.axes(xlim=(0, self.__length), ylim=(np.min(self.__data), np.max(self.__data)))
         elif np.shape(self.__data)[1] == 2:
@@ -50,10 +52,10 @@ class GgosPlot:
         # ax = plt.axes(xlim=(0, len(self.__data)), ylim=(np.min(self.__data), np.max(self.__data)))
         # self.__line, = ax.plot([], [], lw=2)
         # self.__line_2, = ax.plot([], [], lw=1, color="r")
-        if self.__data.ndim == 1:
-            plt.plot(range(0, self.__length), self.__data, 'b')
+        if (isinstance(self.__data, list)) or (self.__data.ndim == 1):
+            plt.plot(range(0, self.__length), self.__data, 'g')
         elif np.shape(self.__data)[1] == 2:
-            plt.plot(self.__data[:, 0], self.__data[:, 1], 'b')
+            plt.plot(self.__data[:, 0], self.__data[:, 1], 'g')
             # plt.plot(range(0, 9000), part_data_2/5, 'r')
         elif np.shape(self.__data)[1] == 3:
             # https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html
@@ -111,7 +113,7 @@ class GgosPlot:
         else:
             plt.show(block=True)
 
-    def show(self, save=False):
-        if save:
-            plt.savefig('Figure_1.pdf')
+    def show(self, name=''):
+        if name != '':
+            plt.savefig(name+'.pdf')
         plt.show()

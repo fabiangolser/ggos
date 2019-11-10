@@ -25,7 +25,7 @@ class Data:
         self.read_given_txt()
         self.read_isdc_files()
         self.interpolate()
-        self.w = np.array([self.earth_rottation(0), ])
+        self.w = np.array([self.earth_rotation(0), ])
         self.w_dot = np.array([[0, 0, 0], ])    # maybe not initialized correct yet
 
     def append_w(self, w_new):
@@ -55,7 +55,7 @@ class Data:
                 if i[:-4] == 'potentialCoefficientsTides':
                     self.pc_tides_ = np.asarray(facts).astype(float)
                 if i[:-4] == 'earthRotationVector':
-                    self.earth_rottation_ = np.asarray(facts).astype(float)
+                    self.earth_rotation_ = np.asarray(facts).astype(float)
                 if i[:-4] == 'moon':
                     self.moon_ = np.asarray(facts).astype(float)
                 if i[:-4] =='sun':
@@ -134,9 +134,9 @@ class Data:
         offset = 8760
         return self.getter_tc(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.sun_)
                 
-    def earth_rottation(self,hour_since_2005):
+    def earth_rotation(self, hour_since_2005):
         offset = 8760
-        return self.getter_tc(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.earth_rottation_)
+        return self.getter_tc(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.earth_rotation_)
 
     def pc_aohis(self, hour_since_2005):
         offset = 8760

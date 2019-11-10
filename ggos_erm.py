@@ -25,27 +25,27 @@ class RotationModel:
     def tg_of_t(self):
         """ T_G(t) = sqrt(5/3)*M*R^2*(matrix) """
         # pre
-        scalar = np.sqrt(5 / 3) * self.__data.M_earth * self.__data.R_earth**(2)
+        scalar = np.sqrt(5 / 3) * self.__data.M_earth * self.__data.R_earth ** (2)
         #print("scalar = {}".format(scalar))
 
         # matrix
         matrix = np.zeros([3, 3])
         c_s = self.__data.pc_aohis(self.__index)
         #print("c_s = {}".format(c_s))
-        matrix[0, 0] = (np.sqrt(1/3)*c_s[0]) - c_s[3]
+        matrix[0, 0] = (np.sqrt(1 / 3) * c_s[0]) - c_s[3]
         matrix[0, 1] = -c_s[4]
         matrix[0, 2] = -c_s[1]
         matrix[1, 0] = -c_s[4]
-        matrix[1, 1] = (np.sqrt(1/3)*c_s[0]) + c_s[3]
+        matrix[1, 1] = (np.sqrt(1 / 3) * c_s[0]) + c_s[3]
         matrix[1, 2] = -c_s[2]
         matrix[2, 0] = -c_s[1]
         matrix[2, 1] = -c_s[2]
-        matrix[2, 2] = -(2*np.sqrt(1/3)*c_s[0])
+        matrix[2, 2] = -(2 * np.sqrt(1 / 3) * c_s[0])
         #print("matrix = \n{}".format(matrix))
 
         # tr
         tr = self.__data.A_B_strich + self.__data.C_strich
-        #print("tr = {}".format(tr))
+        # print("tr = {}".format(tr))
         matrix_2 = np.eye(3)
         matrix_2 = matrix_2 * (tr / 3)
         #print("matrix_2 = \n{}".format(matrix_2))
@@ -55,7 +55,7 @@ class RotationModel:
     def tr_of_t(self):
         """ T_R(t) = (O_N*R^5)/(3*G) * (matrix) """
         # pre
-        scalar = (self.__data.Omega_n * self.__data.R_earth**(5)) / (3 * self.__data.G)
+        scalar = (self.__data.Omega_n * self.__data.R_earth ** (5)) / (3 * self.__data.G)
         #print("scalar = {}".format(scalar))
 
         # matrix
@@ -96,3 +96,17 @@ class RotationModel:
         self.__data.append_w_dot(w_dot)
         print('w_dot = \n{}'.format(self.__data.w_dot))
         return w_dot
+
+    def polar_motion(self, index, use_ref=False):
+        """ x_p(t) = (R/W_N) * w_x(t), y_p(t) = (R/W_N) * w_y(t) """
+        if use_ref:
+            w = self.__data.earth_rotation(index)
+        else:
+            w = self.__data.w[index]
+
+        #print("w = \n{}".format(w))
+        x_p = (self.__data.R_earth / self.__data.Omega_n) * w[0]
+        y_p = (self.__data.R_earth / self.__data.Omega_n) * w[1]
+
+        return [[x_p, y_p]]
+
