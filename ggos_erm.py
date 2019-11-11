@@ -14,8 +14,8 @@ class RotationModel:
     def __init__(self, data):
         self.__data = data
         self.__index = 0
-        self.__t_total_current = np.zeros([3, 3])
-        self.__t_total_last = np.zeros([3, 3])
+        self.__tg_current = np.zeros([3, 3])
+        self.__tg_last = np.zeros([3, 3])
 
     def m_of_t(self, j):
         """ Fromel!!!!!!!!!! """
@@ -26,7 +26,7 @@ class RotationModel:
     def force(self):
         """ Fromel!!!!!!!!!! """
         scalar = (self.__data.Omega_n**2 * self.__data.R_earth ** (5)) / (3 * self.__data.G)
-        print("scalar = {}".format(scalar))
+        #print("scalar = {}".format(scalar))
 
         # matrix
         matrix = np.zeros([3, 3])
@@ -37,7 +37,7 @@ class RotationModel:
         matrix[0, 1] = (k_im)
         matrix[1, 0] = (-k_im)
         matrix[1, 1] = (k_re)
-        print("matrix = \n{}".format(matrix))
+        #print("matrix = \n{}".format(matrix))
 
         return self.t_total() + scalar * matrix
 
@@ -64,12 +64,14 @@ class RotationModel:
 
         # tr
         tr = self.__data.A_B_strich + self.__data.C_strich
-        # print("tr = {}".format(tr))
+        #print("tr = {}".format(tr))
         matrix_2 = np.eye(3)
         matrix_2 = matrix_2 * (tr / 3)
         #print("matrix_2 = \n{}".format(matrix_2))
 
-        return (scalar * matrix) + matrix_2
+        self.__tg_last = self.__tg_current
+        self.__tg_current = (scalar * matrix) + matrix_2
+        return self.__tg_current
 
     def tr_of_t(self):
         """ T_R(t) = (O_N*R^5)/(3*G) * (matrix) """
@@ -94,15 +96,14 @@ class RotationModel:
 
     def t_total(self):
         """ T(t) = T_G(t) + T_R(t) """
-        self.__t_total_last = self.__t_total_current
-        self.__t_total_current = self.tg_of_t() + self.tr_of_t()
-        return self.__t_total_current
+        return self.__tg_current + self.tr_of_t()
 
     def h_it_self(self):
         pass
 
     def delta_tg(self):
-        delta_tg = self.__t_total_current - self.__t_total_last
+        """ dTG(t) = T_G(t) - T_R(t-1) """
+        delta_tg = self.__tg_current - self.__tg_last
         return delta_tg
 
     def delta_h(self):
@@ -110,22 +111,26 @@ class RotationModel:
 
     def omega_dot(self, index, m=np.zeros([3, ]), dt=np.zeros([3, 3]), h=np.zeros([3, ]), dh=np.zeros([3, ])):
         self.__index = index
-        w_dot = np.array([0, 0, 0])
 
-        w = self.__data.w
+        w = self.__data.w[index]
         #print('w({}) = \n{}'.format(index, w))
-        DT_G = self.delta_tg()
-        #print('DT_G({}) = \n{}'.format(index, DT_G))
+
+        TG = self.tg_of_t()
+        #print('TG({}) = \n{}'.format(index, TG))
         T = self.t_total()
         #print('T({}) = \n{}'.format(index, T))
+        DT_G = self.delta_tg()
+        #print('DT_G({}) = \n{}'.format(index, DT_G))
 
         """ (D*T_G/Dt) * w """
         DT_G_Dt_w = np.dot(DT_G, np.transpose(w))
         #print('(D*T_G/Dt) * w({}) = \n{}'.format(index, DT_G_Dt_w))
 
+        """ F^(-1) """
         f = self.force()
         #print('Force({}) = \n{}'.format(index, f))
         f_invers = np.linalg.inv(f)
+
         """ w x (T * w) """
         Tw = np.dot(T, np.transpose(w))
         w_x_Tw = np.transpose(np.cross(w, np.transpose(Tw)))
@@ -137,12 +142,13 @@ class RotationModel:
         #print('w_dot({}) = \n{}'.format(index, w_dot))
 
         w_dot = np.transpose(w_dot)
+        ww_dot = w + w_dot*1
+        self.__data.append_w([ww_dot])
         if self.__index == 0:
-            self.__data.w = (w + w_dot*1)
+            self.__data.w_dot = w_dot
         else:
             self.__data.append_w_dot(w_dot)
-            
-        self.__data.append_w(w + w_dot*1)
+
         return w_dot
 
     def polar_motion(self, index, use_ref=False):

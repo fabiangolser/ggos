@@ -55,11 +55,14 @@ def test_calculation(data):
     test_erm = erm.RotationModel(data)
 
     test_erm.omega_dot(0)
+    test_erm.polar_motion(0)
 
-    polar = test_erm.polar_motion(0,)
-#    polar_ref = test_erm.polar_motion(0)
-    for index in range(1, 100):
-        test_erm.omega_dot(index)
+    test_erm.omega_dot(1)
+    polar = test_erm.polar_motion(1)
+#    polar_ref = test_erm.poar_motion(0)
+    for index in range(2, int(len_max/10)):
+        w_dot = test_erm.omega_dot(index)
+        print('omega_dot({}) = {}'.format(index, w_dot))
         polar = np.append(polar, test_erm.polar_motion(index), axis=0)    # only compute first step so far
         #polar = np.append(polar, [[1, index]], axis=0)
 #        polar_ref = np.append(polar_ref, test_erm.polar_motion(index, True), axis=0)
@@ -69,7 +72,7 @@ def test_calculation(data):
     plot_polar = g_plot.GgosPlot(polar, 3000)
     plot_polar.plot()
     #plot_polar.animate(0.2)
-    plot_polar.show('polar_motion_20')
+    plot_polar.show('polar_motion_10')
 
 
     # plot polar ref
