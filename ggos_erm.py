@@ -19,11 +19,27 @@ class RotationModel:
 
     def m_of_t(self, j):
         """ Fromel!!!!!!!!!! """
+#        if j ==1: #sun
+#            const = ()/()
         return np.zeros([3, ])
 
-    def force(self, j):
+    def force(self):
         """ Fromel!!!!!!!!!! """
-        pass
+        scalar = (self.__data.Omega_n**2 * self.__data.R_earth ** (5)) / (3 * self.__data.G)
+        print("scalar = {}".format(scalar))
+
+        # matrix
+        matrix = np.zeros([3, 3])
+        k_re = self.__data.k_Re
+        k_im = self.__data.k_Im
+
+        matrix[0, 0] = (k_re)
+        matrix[0, 1] = (k_im)
+        matrix[1, 0] = (-k_im)
+        matrix[1, 1] = (k_re)
+        print("matrix = \n{}".format(matrix))
+
+        return self.t_total() + scalar * matrix
 
     def tg_of_t(self):
         """ T_G(t) = sqrt(5/3)*M*R^2*(matrix) """
@@ -97,32 +113,36 @@ class RotationModel:
         w_dot = np.array([0, 0, 0])
 
         w = self.__data.w
-        print('w({}) = \n{}'.format(index, w))
+        #print('w({}) = \n{}'.format(index, w))
         DT_G = self.delta_tg()
-        print('DT_G({}) = \n{}'.format(index, DT_G))
+        #print('DT_G({}) = \n{}'.format(index, DT_G))
         T = self.t_total()
-        print('T({}) = \n{}'.format(index, T))
+        #print('T({}) = \n{}'.format(index, T))
 
         """ (D*T_G/Dt) * w """
         DT_G_Dt_w = np.dot(DT_G, np.transpose(w))
-        print('(D*T_G/Dt) * w({}) = \n{}'.format(index, DT_G_Dt_w))
+        #print('(D*T_G/Dt) * w({}) = \n{}'.format(index, DT_G_Dt_w))
 
+        f = self.force()
+        #print('Force({}) = \n{}'.format(index, f))
+        f_invers = np.linalg.inv(f)
         """ w x (T * w) """
         Tw = np.dot(T, np.transpose(w))
         w_x_Tw = np.transpose(np.cross(w, np.transpose(Tw)))
-        print('w x (T * w)({}) = \n{}'.format(index, w_x_Tw))
+        #print('w x (T * w)({}) = \n{}'.format(index, w_x_Tw))
 
         """ w_dot = F^(-1) * [M - ((D*T_G/Dt) * w) - (w x (T * w)) - (w x h) - (D_h/Dt)] """
         """ w_dot = F^(-1) * [M - (DT_G_Dt_w)      - (w_x_Tw)      - (w x h) - (D_h/Dt)] """
-        w_dot     =               (DT_G_Dt_w)      - (w_x_Tw)
-        print('w_dot({}) = \n{}'.format(index, w_dot))
+        w_dot     = np.dot(f_invers, (DT_G_Dt_w) - (w_x_Tw))
+        #print('w_dot({}) = \n{}'.format(index, w_dot))
 
         w_dot = np.transpose(w_dot)
         if self.__index == 0:
-            self.__data.w_dot = w_dot
+            self.__data.w = (w + w_dot*1)
         else:
             self.__data.append_w_dot(w_dot)
-
+            
+        self.__data.append_w(w + w_dot*1)
         return w_dot
 
     def polar_motion(self, index, use_ref=False):

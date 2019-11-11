@@ -13,7 +13,8 @@ import ggos_erm as erm
 
 def main(argv=sys.argv):
     """ here the different test methods are called """
-    data = test_data()
+    data = g_data.Data() #g_data.Data()>> constructor >> erstellt Objekt data = g_data.Data() >>> speichert Obejekt aut Variable data
+    #data = test_data()
     #test_plot(data)
     test_calculation(data)
 
@@ -48,6 +49,36 @@ def test_data(length=1000):
     return test
 
 
+def test_calculation(data):
+    """ test calculations """
+    len_max = 87649 - 8760
+    test_erm = erm.RotationModel(data)
+
+    test_erm.omega_dot(0)
+
+    polar = test_erm.polar_motion(0,)
+#    polar_ref = test_erm.polar_motion(0)
+    for index in range(1, 100):
+        test_erm.omega_dot(index)
+        polar = np.append(polar, test_erm.polar_motion(index), axis=0)    # only compute first step so far
+        #polar = np.append(polar, [[1, index]], axis=0)
+#        polar_ref = np.append(polar_ref, test_erm.polar_motion(index, True), axis=0)
+
+    # plot polar
+
+    plot_polar = g_plot.GgosPlot(polar, 3000)
+    plot_polar.plot()
+    #plot_polar.animate(0.2)
+    plot_polar.show('polar_motion_20')
+
+
+    # plot polar ref
+#    plot_polar_ref = g_plot.GgosPlot(polar_ref, 3000)
+#    plot_polar_ref.plot()
+#    plot_polar_ref.animate(0.2)
+    #plot_polar_ref.show('polar_motion_ref_20')
+
+
 def test_plot(data):
     """ test plot data """
     z = 1000
@@ -80,36 +111,6 @@ def test_plot(data):
     arr2Df = np.delete(b, [2, ], axis=1)  # use only first 2 columns
     third_test_plot = g_plot.GgosPlot(arr2Df, plot_range)
     third_test_plot.animate(0.5, True, 100)
-
-
-def test_calculation(data):
-    """ test calculations """
-    len_max = 87649 - 8760
-    test_erm = erm.RotationModel(data)
-
-    test_erm.omega_dot(0)
-
-    polar = test_erm.polar_motion(0)
-    polar_ref = test_erm.polar_motion(0)
-    for index in range(0, int(len_max/20)):
-        #test_erm.omega_dot(index)
-        #polar = np.append(polar, test_erm.polar_motion(index), axis=0)    # only compute first step so far
-        #polar = np.append(polar, [[1, index]], axis=0)
-        polar_ref = np.append(polar_ref, test_erm.polar_motion(index, True), axis=0)
-
-    # plot polar
-    '''
-    plot_polar = g_plot.GgosPlot(polar, 3000)
-    plot_polar.plot()
-    #plot_polar.animate(0.2)
-    plot_polar.show('polar_motion_20')
-    '''
-
-    # plot polar ref
-    plot_polar_ref = g_plot.GgosPlot(polar_ref, 3000)
-    plot_polar_ref.plot()
-    plot_polar_ref.animate(0.2)
-    #plot_polar_ref.show('polar_motion_ref_20')
 
 
 if __name__ == "__main__":
