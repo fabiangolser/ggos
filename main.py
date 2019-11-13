@@ -74,11 +74,11 @@ def test_calculation(data):
     plot_polar.show('polar_motion_10')
 
     # plot w_dot
-    w_dot = np.delete(w_dot, 2, 1)
-    plot_w_dot = g_plot.GgosPlot(w_dot, 3000)
-    plot_w_dot.plot()
+    #w_dot = np.delete(w_dot, 2, 1)
+    #plot_w_dot = g_plot.GgosPlot(w_dot, 3000)
+    #plot_w_dot.plot()
     # plot_polar.animate(0.2)
-    plot_w_dot.show('plot_w_dot_10')
+    #plot_w_dot.show('plot_w_dot_10')
 
     # plot polar ref
     #plot_polar_ref = g_plot.GgosPlot(polar_ref, 3000)
