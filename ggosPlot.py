@@ -36,7 +36,9 @@ class GgosPlot:
         elif np.shape(self.__data)[1] == 3:
             print('3-dimensional plot: ', np.shape(self.__data))
             mpl.rcParams['legend.fontsize'] = 10
-            self.__ax = self.__fig.gca(projection='3d')
+            self.__ax = self.__fig.gca(projection='3d', xlim=(np.min(self.__data[:, 0]), np.max(self.__data[:, 0])),
+                                       ylim=(np.min(self.__data[:, 1]), np.max(self.__data[:, 1])),
+                                       zlim=(np.min(self.__data[:, 2]), np.max(self.__data[:, 2])))
             not_init_line = False
         else:
             print('dimension too high to plot: ', np.shape(self.__data))
