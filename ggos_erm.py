@@ -196,7 +196,7 @@ class RotationModel:
         else:
             self.__data.append_w_dot(w_dot)
 
-        return [w_dot], f_invers, M, DT_G_Dt_w, w_x_Tw, w_x_h, dh, w
+        return [w_dot], f_invers, M, DT_G_Dt_w, w_x_Tw, w_x_h, dh, w, T
 
     def polar_motion(self, index, use_ref=False):
         """ x_p(t) = (R/W_N) * w_x(t), y_p(t) = (R/W_N) * w_y(t) """

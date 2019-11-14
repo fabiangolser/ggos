@@ -15,12 +15,14 @@ from mpl_toolkits.mplot3d import Axes3D
 
 class GgosPlot:
 
-    def __init__(self, data, plot_range=0):
+    def __init__(self, data, plot_range=0, name=''):
         self.__data = data
         if plot_range == 0:
             plot_range = len(self.__data[0])
         self.__plot_range = plot_range
+        self.__d = data
         self.__fig = plt.figure(figsize=(20, 12))
+        self.__fig.canvas.set_window_title(name)
         self.__length = np.shape(self.__data)[0]
 
         not_init_line = True
