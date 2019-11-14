@@ -115,77 +115,67 @@ class Data:
                 if i[0,-1] == self.slam_f[0,-1]:
                     self.slam_[:, j] = yinterp
 
-    def getter_tc(self, year, indizes, file):
-        index_year = self.years_tc.index(year)
-        pos = index_year + indizes
+    def getter_tc(self, indizes, file):
+        pos = indizes
         corrent_line = file[pos][1::]
         return corrent_line      
         
-    def getter_isdc_3H(self, year, indizes, file):
-        index_year = self.years_tc.index(year)
-        pos = index_year + indizes
+    def getter_isdc_3H(self, indizes, file):
+        pos = indizes
         corrent_line = file[pos,:]
- #        corrent_line = file[pos,5::]
         return corrent_line
 
     def moon(self, hour_since_2005):
-        offset = 8760
-        return self.getter_tc(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.moon_)
+        return self.getter_tc(hour_since_2005, self.moon_)
 
     def sun(self, hour_since_2005):
-        offset = 8760
-        return self.getter_tc(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.sun_)
+        return self.getter_tc(hour_since_2005, self.sun_)
                 
     def earth_rotation(self, hour_since_2005):
-        offset = 8760
-        return self.getter_tc(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.earth_rotation_)
+        return self.getter_tc(hour_since_2005, self.earth_rotation_)
 
     def pc_aohis(self, hour_since_2005):
-        offset = 8760
-        return self.getter_tc(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.pc_aohis_)
+        return self.getter_tc(hour_since_2005, self.pc_aohis_)
 
     def pc_tide(self, hour_since_2005):
-        offset = 8760
-        return self.getter_tc(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.pc_tides_)
+        return self.getter_tc(hour_since_2005, self.pc_tides_)
     
     def aam(self, hour_since_2005):
-        offset = 8760
-        return self.getter_isdc_3H(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.aam_)
+        return self.getter_isdc_3H(hour_since_2005, self.aam_)
 
     def aom(self, hour_since_2005):
-        offset = 8760
-        return self.getter_isdc_3H(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.oam_)
+        return self.getter_isdc_3H(hour_since_2005, self.oam_)
     
     def ham(self, hour_since_2005):
-        offset = 8760
-        return self.getter_isdc_3H(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.ham_)
+        return self.getter_isdc_3H(hour_since_2005, self.ham_)
 
     def slam(self, hour_since_2005):
-        offset = 8760
-        return self.getter_isdc_3H(2005+int(np.floor(hour_since_2005/offset)), hour_since_2005 % offset, self.slam_)
+        return self.getter_isdc_3H(hour_since_2005, self.slam_)
 
-#test = Data()
-#
-#
-#z = len(test.moon_)
-#a = np.zeros([z, 3])
-#b = np.zeros([z, 3])
-#c = np.zeros([z, 3])
-#d = np.zeros([z, 5])
-#e = np.zeros([z, 5])
-#
-#f = np.zeros([z, 6])
-#g = np.zeros([z, 6])
-#h = np.zeros([z, 6])
-#j = np.zeros([z, 3])
-#for i in range(z):
-#    a[i, :] = np.transpose(test.moon(i))
-##    b[i, :] = np.transpose(test.sun(i))
-##    c[i, :] = np.transpose(test.earth_rotation(i))
-##    d[i, :] = np.transpose(test.pc_aohis(i))
-##    e[i, :] = np.transpose(test.pc_tide(i))
-##
-##    f[i, :] = np.transpose(test.aam(i))
-##    g[i, :] = np.transpose(test.aom(i))
-##    h[i, :] = np.transpose(test.ham(i))
-##    j[i, :] = np.transpose(test.slam(i))
+test = Data()
+
+
+z = len(test.moon_)
+
+a = np.zeros([z, 3])
+b = np.zeros([z, 3])
+c = np.zeros([z, 3])
+d = np.zeros([z, 5])
+e = np.zeros([z, 5])
+
+f = np.zeros([z, 6])
+g = np.zeros([z, 6])
+h = np.zeros([z, 6])
+j = np.zeros([z, 3])
+
+for i in range(z):
+    a[i, :] = np.transpose(test.moon(i))
+    b[i, :] = np.transpose(test.sun(i))
+    c[i, :] = np.transpose(test.earth_rotation(i))
+    d[i, :] = np.transpose(test.pc_aohis(i))
+    e[i, :] = np.transpose(test.pc_tide(i))
+
+    f[i, :] = np.transpose(test.aam(i))
+    g[i, :] = np.transpose(test.aom(i))
+    h[i, :] = np.transpose(test.ham(i))
+    j[i, :] = np.transpose(test.slam(i))
