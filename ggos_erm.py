@@ -65,7 +65,7 @@ class RotationModel:
         # matrix
         matrix = np.zeros([3, 3])
         c_s = self.__data.pc_aohis(self.__index)
-        #print("c_s = {}".format(c_s))
+        # print("c_s = {}".format(c_s))
         matrix[0, 0] = (np.sqrt(1 / 3) * c_s[0]) - c_s[3]
         matrix[0, 1] = -c_s[4]
         matrix[0, 2] = -c_s[1]
@@ -75,7 +75,7 @@ class RotationModel:
         matrix[2, 0] = -c_s[1]
         matrix[2, 1] = -c_s[2]
         matrix[2, 2] = -(2 * np.sqrt(1 / 3) * c_s[0])
-        #print("matrix = \n{}".format(matrix))
+        # print("matrix = \n{}".format(matrix))
 
         # tr
         tr = self.__data.A_B_strich + self.__data.A_B_strich + self.__data.C_strich

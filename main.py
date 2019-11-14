@@ -13,13 +13,13 @@ import ggos_erm as erm
 
 def main(argv=sys.argv):
     """ here the different test methods are called """
-    data = g_data.Data() #g_data.Data()>> constructor >> erstellt Objekt data = g_data.Data() >>> speichert Obejekt aut Variable data
+    data = g_data.Data() # g_data.Data()>> constructor >> erstellt Objekt data = g_data.Data() >>> speichert Obejekt aut Variable data
     #data = test_data()
     #test_plot(data)
     test_calculation(data)
 
 
-def test_data(length=1000):
+def test_data(length=10000):
     """ test data """
     # sun.txt    moon.txt     earthRotationVector.txt
     # potentialCoefficientsAOHIS.txt     potentialCoefficientsTides.txt
