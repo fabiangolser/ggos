@@ -126,12 +126,12 @@ class RotationModel:
         h_x = h_aam + h_aom + h_ham
 
         h = np.zeros([3, ])
-        h[0] = (1.610 / (self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich))) * h_x[3]
-        h[1] = (1.610 / (self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich))) * h_x[4]
-        h[2] = (1.125 / (self.__data.Omega_n * self.__data.C_strich)) * h_x[5]
-        #h[0] = ((self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich)) / 1.610) * h_x[3]
-        #h[1] = ((self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich)) / 1.610) * h_x[4]
-        #h[2] = ((self.__data.Omega_n * self.__data.C_strich) / 1.125) * h_x[5]
+        #h[0] = (1.610 / (self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich))) * h_x[3]
+        #h[1] = (1.610 / (self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich))) * h_x[4]
+        #h[2] = (1.125 / (self.__data.Omega_n * self.__data.C_strich)) * h_x[5]
+        h[0] = ((self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich)) / 1.610) * h_x[3]
+        h[1] = ((self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich)) / 1.610) * h_x[4]
+        h[2] = ((self.__data.Omega_n * self.__data.C_strich) / 1.125) * h_x[5]
 
         self.__h_last = self.__h_current
         self.__h_current = h
@@ -214,7 +214,7 @@ class RotationModel:
         else:
             self.__data.append_w_dot([w_dot])
 
-        return [w_dot], f_invers, [M], [DT_G_Dt_w], [w_x_Tw], [w_x_h], dh, [w], T, TG, TR
+        return [w_dot], f_invers, [M], [DT_G_Dt_w], [w_x_Tw], [w_x_h], [h], [dh], [w], T, TG, TR, [Tw]
 
     def polar_motion(self, index, use_ref=False):
         """ x_p(t) = (R/W_N) * w_x(t), y_p(t) = (R/W_N) * w_y(t) """
@@ -231,4 +231,5 @@ class RotationModel:
         return [[x_p, y_p]]
 
     def delta_lod(self, index):
-        return 86400 * ((self.__data.Omega_n - self.__data.w[index][2]) / self.__data.Omega_n)
+        #return 86400 * ((self.__data.Omega_n - self.__data.w[index][2]) / self.__data.Omega_n)
+        return 1 * ((self.__data.Omega_n - self.__data.w[index][2]) / self.__data.Omega_n)

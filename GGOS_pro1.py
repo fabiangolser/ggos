@@ -152,6 +152,7 @@ class Data:
     def slam(self, hour_since_2005):
         return self.getter_isdc_3H(hour_since_2005, self.slam_)
 
+'''
 test = Data()
 
 
@@ -179,3 +180,4 @@ for i in range(z):
     g[i, :] = np.transpose(test.aom(i))
     h[i, :] = np.transpose(test.ham(i))
     j[i, :] = np.transpose(test.slam(i))
+'''
