@@ -66,16 +66,23 @@ def test_data(length=1000):
 def test_calculation(data):
     """ test calculations """
     len_max = 87649 - 8760
+    plot_length = 1000
     test_erm = erm.RotationModel(data)
 
+    ''' index = 0 '''
     test_erm.omega_dot(0)
     test_erm.polar_motion(0)
+    test_erm.delta_lod(0)
 
-    w_dot_v, f_invers_v, M_v, DT_G_Dt_w_v, w_x_Tw_v, w_x_h_v, dh_v, w_v, T_v = test_erm.omega_dot(1)
+    ''' index = 1 '''
+    w_dot_v, f_invers_v, M_v, DT_G_Dt_w_v, w_x_Tw_v, w_x_h_v, dh_v, w_v, T_v, TG_v, TR_v = test_erm.omega_dot(1)
     polar = test_erm.polar_motion(1)
+    d_lod = test_erm.delta_lod(1)
     #    polar_ref = test_erm.poar_motion(0)
-    for index in range(2, int(3000)):
-        w_dot, f_invers, M, DT_G_Dt_w, w_x_Tw, w_x_h, dh, w, T = test_erm.omega_dot(index)
+
+    ''' index = 2 ... plot_length '''
+    for index in range(2, int(plot_length)):
+        w_dot, f_invers, M, DT_G_Dt_w, w_x_Tw, w_x_h, dh, w, T, TG, TR = test_erm.omega_dot(index)
         w_dot_v = np.append(w_dot_v, w_dot, axis=0)
         f_invers_v = np.append(f_invers_v, f_invers, axis=0)
         M_v = np.append(M_v, M, axis=0)
@@ -85,37 +92,49 @@ def test_calculation(data):
         dh_v = np.append(dh_v, dh, axis=0)
         w_v = np.append(w_v, w, axis=0)
         T_v = np.append(T_v, T, axis=0)
+        TG_v = np.append(TG_v, TG, axis=0)
+        TR_v = np.append(TR_v, TR, axis=0)
 
         polar = np.append(polar, test_erm.polar_motion(index), axis=0)
         # print('omega_dot({}) = {}'.format(index-1, w_dot[index-1]))
         # polar = np.append(polar, [[1, index]], axis=0)
         # polar_ref = np.append(polar_ref, test_erm.polar_motion(index, True), axis=0)
+        d_lod = np.append(d_lod, test_erm.delta_lod(index))
 
-    g_plot.GgosPlot(w_dot_v, 2500, 'w_dot_v').plot()
-    g_plot.GgosPlot(f_invers_v, 3000, 'f_invers_v').plot()
-    g_plot.GgosPlot(M_v, 3000, 'M_v').plot()
-    g_plot.GgosPlot(DT_G_Dt_w_v, 3000, 'DT_G_Dt_w_v').plot()
-    g_plot.GgosPlot(w_x_Tw_v, 3000, 'w_x_Tw_v').plot()
-    g_plot.GgosPlot(w_x_h_v, 3000, 'w_x_h_v').plot()
-    g_plot.GgosPlot(dh_v, 3000, 'dh_v').plot()
-    g_plot.GgosPlot(w_v, 3000, 'w_v').plot()
-    g_plot.GgosPlot(T_v, 3000, 'T_v').plot()
+    ''' intermediate plots '''
+    g_plot.GgosPlot(w_dot_v, plot_length, 'w_dot_v').plot()
+    ###g_plot.GgosPlot(f_invers_v, plot_length, 'f_invers_v').plot()
+    #g_plot.GgosPlot(M_v, plot_length, 'M_v').plot()
+    g_plot.GgosPlot(DT_G_Dt_w_v, plot_length, 'DT_G_Dt_w_v').plot()
+    g_plot.GgosPlot(w_x_Tw_v, plot_length, 'w_x_Tw_v').plot()
+    g_plot.GgosPlot(w_x_h_v, plot_length, 'w_x_h_v').plot()
+    #g_plot.GgosPlot(dh_v, plot_length, 'dh_v').plot()
+    g_plot.GgosPlot(w_v, plot_length, 'w_v').plot()
+    ###g_plot.GgosPlot(T_v, plot_length, 'T_v').plot()
+    ###g_plot.GgosPlot(TG_v, plot_length, 'TG_v').plot()
+    ###g_plot.GgosPlot(TR_v, plot_length, 'TR_v').plot()
+
+    ''' final plots '''
+    # delta LOD
+    g_plot.GgosPlot(d_lod, plot_length, 'delta_LOD').plot()
 
     # plot polar
-    plot_polar = g_plot.GgosPlot(polar, 3000, 'polar_motion_10')
+    plot_polar = g_plot.GgosPlot(polar, plot_length, 'polar_motion_10')
     plot_polar.plot()
     # plot_polar.animate(0.2)
     plot_polar.show('polar_motion_10')
 
+
+    ''' reference plots '''
     # plot w_dot
     # w_dot = np.delete(w_dot, 2, 1)
-    # plot_w_dot = g_plot.GgosPlot(w_dot, 3000)
+    # plot_w_dot = g_plot.GgosPlot(w_dot, plot_length)
     # plot_w_dot.plot()
     # plot_polar.animate(0.2)
     # plot_w_dot.show('plot_w_dot_10')
 
     # plot polar ref
-    # plot_polar_ref = g_plot.GgosPlot(polar_ref, 3000)
+    # plot_polar_ref = g_plot.GgosPlot(polar_ref, plot_length)
     # plot_polar_ref.plot()
     # plot_polar_ref.animate(0.2)
     # plot_polar_ref.show('polar_motion_ref_10')

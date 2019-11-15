@@ -23,6 +23,8 @@ class RotationModel:
         """ Fromel!!!!!!!!!! """
         M = np.zeros([3, ])
 
+        if j == 0:  # zero matrix
+            return M
         if j == 1:  # sun
             body = self.__data.sun(self.__index)
             GM = self.__data.GM_sun
@@ -124,13 +126,12 @@ class RotationModel:
         h_x = h_aam + h_aom + h_ham
 
         h = np.zeros([3, ])
-        #h_x[0] = (1.610 / (self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich))) * h[3]
-        #h_x[1] = (1.610 / (self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich))) * h[4]
-        #h_x[2] = (1.125 / (self.__data.Omega_n * self.__data.C_strich)) * h[5]
-
-        h[0] = ((self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich)) / 1.610) * h_x[3]
-        h[1] = ((self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich)) / 1.610) * h_x[4]
-        h[2] = ((self.__data.Omega_n * self.__data.C_strich) / 1.125) * h_x[5]
+        h[0] = (1.610 / (self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich))) * h_x[3]
+        h[1] = (1.610 / (self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich))) * h_x[4]
+        h[2] = (1.125 / (self.__data.Omega_n * self.__data.C_strich)) * h_x[5]
+        #h[0] = ((self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich)) / 1.610) * h_x[3]
+        #h[1] = ((self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich)) / 1.610) * h_x[4]
+        #h[2] = ((self.__data.Omega_n * self.__data.C_strich) / 1.125) * h_x[5]
 
         self.__h_last = self.__h_current
         self.__h_current = h
@@ -140,6 +141,10 @@ class RotationModel:
         """ Dh_dt(t) = h(t) - h(t-1) """
         return self.__h_current - self.__h_last
 
+    def sum_omega_dot(self):
+        w_dot = self.__data.w_dot
+        return w_dot
+
     def omega_dot(self, index, m=np.zeros([3, ]), dt=np.zeros([3, 3]), h=np.zeros([3, ]), dh=np.zeros([3, ])):
         self.__index = index
 
@@ -148,6 +153,8 @@ class RotationModel:
 
         TG = self.tg_of_t()
         #print('TG({}) = \n{}'.format(index, TG))
+        TR = self.tr_of_t()
+        #print('TR({}) = \n{}'.format(index, TR))
         T = self.t_total()
         #print('T({}) = \n{}'.format(index, T))
         DT_G = self.delta_tg()
@@ -162,15 +169,17 @@ class RotationModel:
         M_1 = self.m_of_t(1)
         M_2 = self.m_of_t(2)
         M = M_1 + M_2
-        print('M({}) = \n{}'.format(index, M))
+        #M = self.m_of_t(0)
+        #print('M({}) = \n{}'.format(index, M))
 
         """ (D*T_G/Dt) * w """
         DT_G_Dt_w = np.dot(DT_G, np.transpose(w))
         #print('(D*T_G/Dt) * w({}) = \n{}'.format(index, DT_G_Dt_w))
 
         """ w x (T * w) """
-        Tw = np.dot(T, np.transpose(w))
-        w_x_Tw = np.transpose(np.cross(w, np.transpose(Tw)))
+        Tw = np.dot(T, w)
+        w_x_Tw = np.cross(w, Tw)
+        # w_x_Tw = np.cross(Tw, w)  # alternative computation (should be wrong because too small values on w_dot)
         #print('w x (T * w)({}) = \n{}'.format(index, w_x_Tw))
 
         """ w x h(t) """
@@ -185,18 +194,27 @@ class RotationModel:
 
         """ w_dot = F^(-1) * [M - ((D*T_G/Dt) * w) - (w x (T * w)) - (w x h) - (D_h/Dt)] """
         """ w_dot = F^(-1) * [M - (DT_G_Dt_w)      - (w_x_Tw)      - (w x h) - (D_h/Dt)] """
-        w_dot = np.dot(f_invers, (M - DT_G_Dt_w    -  w_x_Tw       -  w_x_h  -  dh))
+        w_dot = np.dot(f_invers, (M - w_x_Tw))
+        #w_dot = np.dot(f_invers, (M - DT_G_Dt_w    -  w_x_Tw       -  w_x_h  -  dh))
         #print('w_dot({}) = \n{}'.format(index, w_dot))
 
-        w_dot = np.transpose(w_dot)
-        ww_dot = w + w_dot  # + 0.00000000000001
-        self.__data.append_w([ww_dot])
-        if self.__index == 0:
-            self.__data.w_dot = w_dot
-        else:
-            self.__data.append_w_dot(w_dot)
+        sum_w_dot = self.sum_omega_dot()
+        #print('sum_w_dot:\n', sum_w_dot)
+        if index > 1:
+            sum_ = sum_w_dot.sum(axis=0)
+            #print('sum:\n', sum_)
 
-        return [w_dot], f_invers, M, DT_G_Dt_w, w_x_Tw, w_x_h, dh, w, T
+        # w
+        w = w + w_dot
+        self.__data.append_w([w])
+
+        # w_dot
+        if self.__index == 0:
+            self.__data.w_dot = [w_dot]
+        else:
+            self.__data.append_w_dot([w_dot])
+
+        return [w_dot], f_invers, [M], [DT_G_Dt_w], [w_x_Tw], [w_x_h], dh, [w], T, TG, TR
 
     def polar_motion(self, index, use_ref=False):
         """ x_p(t) = (R/W_N) * w_x(t), y_p(t) = (R/W_N) * w_y(t) """
@@ -204,6 +222,7 @@ class RotationModel:
             w = self.__data.earth_rotation(index)
         else:
             w = self.__data.w[index]
+            #w = self.__data.w_dot[index]
 
         #print("w = \n{}".format(w))
         x_p = (self.__data.R_earth / self.__data.Omega_n) * w[0]
@@ -211,3 +230,5 @@ class RotationModel:
 
         return [[x_p, y_p]]
 
+    def delta_lod(self, index):
+        return 86400 * ((self.__data.Omega_n - self.__data.w[index][2]) / self.__data.Omega_n)
