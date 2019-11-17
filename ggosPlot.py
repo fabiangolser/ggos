@@ -11,6 +11,9 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D
+import sys
+import os
+
 
 
 class GgosPlot:
@@ -44,7 +47,7 @@ class GgosPlot:
             not_init_line = False
         else:
             print('dimension too high to plot: ', np.shape(self.__data))
-            exit(-1)
+            #exit(-1)
 
         if not_init_line:
             self.__line, = self.__ax.plot([], [], lw=2)

@@ -117,7 +117,7 @@ class RotationModel:
 
     def delta_tg(self):
         """ dTG(t) = T_G(t) - T_R(t-1) """
-        return self.__tg_current - self.__tg_last
+        return (self.__tg_current - self.__tg_last)/3600
 
     def h_it_self(self):
         h_aam = self.__data.aam(self.__index)
@@ -126,12 +126,13 @@ class RotationModel:
         h_x = h_aam + h_aom + h_ham
 
         h = np.zeros([3, ])
-        #h[0] = (1.610 / (self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich))) * h_x[3]
-        #h[1] = (1.610 / (self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich))) * h_x[4]
-        #h[2] = (1.125 / (self.__data.Omega_n * self.__data.C_strich)) * h_x[5]
-        h[0] = ((self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich)) / 1.610) * h_x[3]
-        h[1] = ((self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich)) / 1.610) * h_x[4]
-        h[2] = ((self.__data.Omega_n * self.__data.C_strich) / 1.125) * h_x[5]
+        h[0] = (1.610 / (self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich))) * h_x[3]
+        h[1] = (1.610 / (self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich))) * h_x[4]
+        h[2] = (1.125 / (self.__data.Omega_n * self.__data.C_strich)) * h_x[5]
+        
+#        h[0] = ((self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich)) / 1.610) * h_x[3]
+#        h[1] = ((self.__data.Omega_n * (self.__data.C_strich - self.__data.A_B_strich)) / 1.610) * h_x[4]
+#        h[2] = ((self.__data.Omega_n * self.__data.C_strich) / 1.125) * h_x[5]
 
         self.__h_last = self.__h_current
         self.__h_current = h
@@ -139,7 +140,7 @@ class RotationModel:
 
     def delta_h(self):
         """ Dh_dt(t) = h(t) - h(t-1) """
-        return self.__h_current - self.__h_last
+        return (self.__h_current - self.__h_last)/3600
 
     def sum_omega_dot(self):
         w_dot = self.__data.w_dot
@@ -194,8 +195,8 @@ class RotationModel:
 
         """ w_dot = F^(-1) * [M - ((D*T_G/Dt) * w) - (w x (T * w)) - (w x h) - (D_h/Dt)] """
         """ w_dot = F^(-1) * [M - (DT_G_Dt_w)      - (w_x_Tw)      - (w x h) - (D_h/Dt)] """
-        w_dot = np.dot(f_invers, (M - w_x_Tw))
-        #w_dot = np.dot(f_invers, (M - DT_G_Dt_w    -  w_x_Tw       -  w_x_h  -  dh))
+        #w_dot = np.dot(f_invers, (M - w_x_Tw))
+        w_dot = np.dot(f_invers, (M - DT_G_Dt_w    -  w_x_Tw       -  w_x_h  -  dh))
         #print('w_dot({}) = \n{}'.format(index, w_dot))
 
         sum_w_dot = self.sum_omega_dot()
