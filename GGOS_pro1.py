@@ -209,6 +209,8 @@ delta_t = np.zeros([3, 3])
 delta_h = np.zeros([3, ])
 polar_v = np.zeros([z, 2])
 delta_lod_v = np.zeros([z, ])
+polar_v_ref = np.zeros([z, 2])
+delta_lod_v_ref = np.zeros([z, ])
 
 #______________________________________________________________________________
 # main loop
@@ -249,6 +251,30 @@ for index in range(z-1):
     # print("c_s = {}".format(c_s))
     matrix[0, 0] = (np.sqrt(1 / 3) * c_s[0]) - c_s[3]
     matrix[0, 1] = -c_s[4]
+
+    """ w x h(t) """
+    w_x_h = np.cross(w, h_v[index, :] - delta_h)
+
+    """ w_dot = F^(-1) * [M - ((D*T_G/Dt) * w) - (w x (T * w)) - (w x h) - (D_h/Dt)] """
+    """ w_dot = F^(-1) * [M - (DT_G_Dt_w)      - (w_x_Tw)      - (w x h) - (D_h/Dt)] """
+    w_dot = np.dot(f_invers, (m - dT_G_Dt_w - w_x_tw - w_x_h ))
+    w_dot_v[index, :] = w_dot
+    #print('w_dot({}) = \n{}'.format(index, w_dot_v[index, :]))
+    
+    w = w + w_dot * 3600
+    w_v[index + 1, :] = w
+    #print('w_v({}) = \n{}'.format(index, w_v[index, :]))
+
+#______________________________________________________________________________
+    # polar_motion
+    """ x_p(t) = (R/W_N) * w_x(t), y_p(t) = (R/W_N) * w_y(t) """
+    w = w_v[index]
+    
+    x_p = (R_earth / Omega_n) * w[0]
+    y_p = (R_earth / Omega_n) * w[1]
+    polar_v[index][0] = x_p
+    polar_v[index][1] = y_p
+
     matrix[0, 2] = -c_s[1]
     matrix[1, 0] = -c_s[4]
     matrix[1, 1] = (np.sqrt(1 / 3) * c_s[0]) + c_s[3]
@@ -350,7 +376,6 @@ for index in range(z-1):
 
     """ w x (T * w) """
     tw = np.dot(t, w)
-    w_x_tw = np.cross(w, tw)
 
     """ w x h(t) """
     w_x_h = np.cross(w, h_v[index, :] - delta_h)
@@ -375,42 +400,107 @@ for index in range(z-1):
     polar_v[index][0] = x_p
     polar_v[index][1] = y_p
  
+    w_x_tw = np.cross(w, tw)
+
+    """ w x h(t) """
+    w_x_h = np.cross(w, h_v[index, :] - delta_h)
+
+    """ w_dot = F^(-1) * [M - ((D*T_G/Dt) * w) - (w x (T * w)) - (w x h) - (D_h/Dt)] """
+    """ w_dot = F^(-1) * [M - (DT_G_Dt_w)      - (w_x_Tw)      - (w x h) - (D_h/Dt)] """
+    w_dot = np.dot(f_invers, (m - dT_G_Dt_w - w_x_tw - w_x_h ))
+    w_dot_v[index, :] = w_dot
+    #print('w_dot({}) = \n{}'.format(index, w_dot_v[index, :]))
+    
+    w = w + w_dot * 3600
+    w_v[index + 1, :] = w
+    #print('w_v({}) = \n{}'.format(index, w_v[index, :]))
+
+#______________________________________________________________________________
+    # polar_motion
+    """ x_p(t) = (R/W_N) * w_x(t), y_p(t) = (R/W_N) * w_y(t) """
+    w = w_v[index]
+    
+    x_p = (R_earth / Omega_n) * w[0]
+    y_p = (R_earth / Omega_n) * w[1]
+    polar_v[index][0] = x_p
+    polar_v[index][1] = y_p
+    
+    # polar_motion ref
+    w = earth_rot[index]
+    polar_v_ref[index][0] = (R_earth / Omega_n) * w[0]
+    polar_v_ref[index][1] = (R_earth / Omega_n) * w[1]
+    
+ 
 #______________________________________________________________________________
     # delta_lod     
-    delta_lod_v[index] = 86400 * ((Omega_n - w_v[index][2]) / Omega_n)
+    delta_lod_v[index] = 86400 * ((Omega_n - earth_rot[index][2]) / Omega_n)
+    
+    # delta_lod ref    
+    delta_lod_v_ref[index] = 86400 * ((Omega_n - earth_rot[index][2]) / Omega_n)
+
+# Don't touch it!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# ____________________________________________________________________________
 
 
 
-
-
-
-
-
-
-
-fig = plt.figure()
+# w
+w_v = w_v[1:len(w_v)-2]
+fig = plt.figure(1)
 ax = plt.axes(projection='3d')
+ax.plot3D(w_v[:, 0], w_v[:, 1], range(0, len(w_v)), 'blue')
+ax.set_xlabel("$\omega_x$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$\omega_y$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
+ax.set_zlabel("Zeit",fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('Simulated earth- rotation', fontsize=19, fontweight="bold")
 
-# Data for a three-dimensional line
-zline = np.linspace(0, 15, 1000)
-xline = np.sin(zline)
-yline = np.cos(zline)
-#ax.plot3D(w_v[:, 0], w_v[:, 1], w_v[:, 2], 'gray')
-ax.plot3D(w_v[:, 0], w_v[:, 1], range(0, 87649), 'gray')
+# w ref
+earth_rot = earth_rot[1:len(earth_rot)-2]
+fig = plt.figure(2)
+ax = plt.axes(projection='3d')
+ax.plot3D(earth_rot[:, 0], earth_rot[:, 1], range(0, len(earth_rot)), 'red')
+ax.set_xlabel("$\omega_x$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$\omega_y$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
+ax.set_zlabel("Zeit",fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('Simulated earth- rotation ref', fontsize=19, fontweight="bold")
 
-
-
-
+# polar
 polar_v = polar_v[1:len(polar_v)-2]
-g_plot.GgosPlot(polar_v, 1000, 'polar').plot()
+fig = plt.figure(3)
+ax = plt.axes()
+ax.plot(polar_v[:, 0], polar_v[:, 1], 'blue')
+ax.set_xlabel("$\omega_x$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$\omega_y$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('Simulated earth- rotation', fontsize=19, fontweight="bold")
 
+# polar ref
+polar_v_ref = polar_v_ref[1:len(polar_v)-2]
+fig = plt.figure(4)
+ax = plt.axes()
+ax.plot(polar_v_ref[:, 0], polar_v_ref[:, 1], 'red')
+ax.set_xlabel("$\omega_x$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$\omega_y$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('Simulated earth- rotation polar_v_ref', fontsize=19, fontweight="bold")
+
+# delta_lod
 delta_lod_v = delta_lod_v[1:len(delta_lod_v)-2]
-g_plot.GgosPlot(delta_lod_v, 1000, 'delta_lod').plot()
+fig = plt.figure(5)
+ax = plt.axes()
+ax.plot(delta_lod_v, range(0, len(delta_lod_v)), 'blue')
+ax.set_xlabel("$\omega_x$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$\omega_y$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('Simulated earth- rotation delta_lod_v', fontsize=19, fontweight="bold")
 
-w_dot_v = w_dot_v[1:len(w_dot_v)-2]
-p1 = g_plot.GgosPlot(w_dot_v, 1000, 'w_dot')
-p1.plot()
-p1.show()
+# delta_lod ref
+delta_lod_v_ref = delta_lod_v_ref[1:len(delta_lod_v_ref)-2]
+fig = plt.figure(6)
+ax = plt.axes()
+ax.plot(delta_lod_v_ref, range(0, len(delta_lod_v_ref)), 'red')
+ax.set_xlabel("$\omega_x$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$\omega_y$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('Simulated earth- rotation delta_lod_v_ref', fontsize=19, fontweight="bold")
+
+
+
 
 
 
