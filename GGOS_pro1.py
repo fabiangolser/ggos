@@ -197,7 +197,7 @@ oam[:, 3] = oam[:, 3] + -3.220254498203050*10**(-8) #e-08
 oam[:, 4] = oam[:, 4] + 8.226002041060833*10**(-8) #e-08
 oam[:, 5] = oam[:, 5] + 3.462197020095727*10**(-9) #e-09
 
-    
+
 w = [0, 0, 0]
 w_v = np.zeros([z, 3])
 w_v[0, :] = earth_rot[0, :]
@@ -384,7 +384,7 @@ for index in range(z-1):
     
  
 #______________________________________________________________________________
-    # delta_lod     
+    # delta_lod
     delta_lod_v[index] = 86400 * ((Omega_n - w_v[index][2]) / Omega_n)
     
     # delta_lod ref    
@@ -395,62 +395,109 @@ for index in range(z-1):
 
 
 # w
+polar_lim_x = (-0.5 * 10**-10, 1.5 * 10**-10)
+polar_lim_y = (-2 * 10**-10, -0.2 * 10**-10)
+polar_lim_z = (2005, 2015)
+line_width_polar = 0.5
 w_v = w_v[1:len(w_v)-2]
 fig = plt.figure(1)
-ax = plt.axes(projection='3d')
-ax.plot3D(w_v[:, 0], w_v[:, 1], range(0, len(w_v)), 'blue')
-ax.set_xlabel("$\omega_x$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
-ax.set_ylabel("$\omega_y$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
-ax.set_zlabel("Zeit",fontsize=15, fontweight="bold", labelpad=10)
-ax.set_title('Simulated earth- rotation', fontsize=19, fontweight="bold")
+ax = plt.axes(projection='3d', xlim=polar_lim_x, ylim=polar_lim_y, zlim=polar_lim_z)
+ax.plot3D(w_v[:, 0], w_v[:, 1], np.linspace(start=2005, stop=2015, num=len(w_v)), 'red', lw=line_width_polar)
+ax.set_xlabel("$\omega_x$ [rad/s * $10^{-10}$]" ,fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$\omega_y$ [rad/s * $10^{-10}$]" ,fontsize=15, fontweight="bold", labelpad=10)
+ax.set_zlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('Simulated earth rotation', fontsize=19, fontweight="bold")
 
 # w ref
 earth_rot = earth_rot[1:len(earth_rot)-2]
 fig = plt.figure(2)
-ax = plt.axes(projection='3d')
-ax.plot3D(earth_rot[:, 0], earth_rot[:, 1], range(0, len(earth_rot)), 'red')
-ax.set_xlabel("$\omega_x$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
-ax.set_ylabel("$\omega_y$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
-ax.set_zlabel("Zeit",fontsize=15, fontweight="bold", labelpad=10)
-ax.set_title('Simulated earth- rotation ref', fontsize=19, fontweight="bold")
+ax = plt.axes(projection='3d', xlim=polar_lim_x, ylim=polar_lim_y, zlim=polar_lim_z)
+ax.plot3D(earth_rot[:, 0], earth_rot[:, 1], np.linspace(start=2005, stop=2015, num=len(earth_rot)), 'blue', lw=line_width_polar)
+ax.set_xlabel("$\omega_x$ [rad/s * $10^{-10}$]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$\omega_y$ [rad/s * $10^{-10}$]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_zlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('ref earth rotation', fontsize=19, fontweight="bold")
+
+# w & w ref
+fig = plt.figure(3)
+ax = plt.axes(projection='3d', xlim=polar_lim_x, ylim=polar_lim_y, zlim=polar_lim_z)
+ax.plot3D(w_v[:, 0], w_v[:, 1], np.linspace(start=2005, stop=2015, num=len(w_v)), 'red', lw=line_width_polar)
+ax.plot3D(earth_rot[:, 0], earth_rot[:, 1], np.linspace(start=2005, stop=2015, num=len(w_v)), 'blue', lw=line_width_polar)
+ax.set_xlabel("$\omega_x$ [rad/s * $10^{-10}$]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$\omega_y$ [rad/s * $10^{-10}$]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_zlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('Comparison Simulated- and ref earth rotation', fontsize=19, fontweight="bold")
+
 
 # polar
+polar_m_lim_x = (-6, 10)
+polar_m_lim_y = (-18, -2)
 polar_v = polar_v[1:len(polar_v)-2]
-fig = plt.figure(3)
-ax = plt.axes()
-ax.plot(polar_v[:, 0], polar_v[:, 1], 'blue')
-ax.set_xlabel("$\omega_x$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
-ax.set_ylabel("$\omega_y$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
-ax.set_title('Simulated earth- rotation', fontsize=19, fontweight="bold")
+fig = plt.figure(4)
+ax = plt.axes(xlim=polar_m_lim_x, ylim=polar_m_lim_y)
+ax.plot(polar_v[:, 0], polar_v[:, 1], 'red', lw=line_width_polar)
+ax.set_xlabel("$x_p$ [m]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$y_p$ [m]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('Simulated polar motion', fontsize=19, fontweight="bold")
 
 # polar ref
-polar_v_ref = polar_v_ref[1:len(polar_v)-2]
-fig = plt.figure(4)
-ax = plt.axes()
-ax.plot(polar_v_ref[:, 0], polar_v_ref[:, 1], 'red')
-ax.set_xlabel("$\omega_x$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
-ax.set_ylabel("$\omega_y$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
-ax.set_title('Simulated earth- rotation polar_v_ref', fontsize=19, fontweight="bold")
+polar_v_ref = polar_v_ref[1:len(polar_v_ref)-2]
+fig = plt.figure(5)
+ax = plt.axes(xlim=polar_m_lim_x, ylim=polar_m_lim_y)
+ax.plot(polar_v_ref[:, 0], polar_v_ref[:, 1], 'blue', lw=line_width_polar)
+ax.set_xlabel("$x_p$ [m]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$y_p$ [m]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('ref polar motion', fontsize=19, fontweight="bold")
+
+
+# polar x & polar x ref
+polar_m_lim_x_comp = (-10, 15)
+polar_m_lim_y_comp = (-20, 0)
+fig = plt.figure(6)
+ax = plt.axes(xlim=polar_lim_z, ylim=polar_m_lim_x_comp)
+ax.plot(np.linspace(start=2005, stop=2015, num=len(polar_v)), polar_v[:, 0], 'red', lw=line_width_polar)
+ax.plot(np.linspace(start=2005, stop=2015, num=len(polar_v)), polar_v_ref[:, 0], 'blue', lw=line_width_polar)
+ax.set_xlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$x_p$ [m]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('polar motion comparison', fontsize=19, fontweight="bold")
+
+# polar y & polar y ref
+fig = plt.figure(7)
+ax = plt.axes(xlim=polar_lim_z, ylim=polar_m_lim_y_comp)
+ax.plot(np.linspace(start=2005, stop=2015, num=len(polar_v)), polar_v[:, 1], 'red', lw=line_width_polar)
+ax.plot(np.linspace(start=2005, stop=2015, num=len(polar_v)), polar_v_ref[:, 1], 'blue', lw=line_width_polar)
+ax.set_xlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$y_p$ [m]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('polar motion comparison', fontsize=19, fontweight="bold")
+
 
 # delta_lod
+lod_lim = 0.003
+line_width = 0.5
 delta_lod_v = delta_lod_v[1:len(delta_lod_v)-2]
-fig = plt.figure(5)
-ax = plt.axes()
-ax.plot(range(0, len(delta_lod_v)), delta_lod_v, 'blue')
-ax.set_xlabel("$\omega_x$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
-ax.set_ylabel("$\omega_y$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
-ax.set_title('Simulated earth- rotation delta_lod_v', fontsize=19, fontweight="bold")
+fig = plt.figure(10)
+ax = plt.axes(ylim=(-lod_lim, lod_lim))
+ax.plot(np.linspace(start=2005, stop=2015, num=len(delta_lod_v)), delta_lod_v, 'red', lw=line_width)
+ax.set_xlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$\Delta$ LOD [s]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('Simulated $\Delta$ LOD', fontsize=19, fontweight="bold")
 
 # delta_lod ref
 delta_lod_v_ref = delta_lod_v_ref[1:len(delta_lod_v_ref)-2]
-fig = plt.figure(6)
-ax = plt.axes()
-ax.plot(range(0, len(delta_lod_v_ref)), delta_lod_v_ref, 'red')
-ax.set_xlabel("$\omega_x$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
-ax.set_ylabel("$\omega_y$ [rad/s * 10^00]",fontsize=15, fontweight="bold", labelpad=10)
-ax.set_title('Simulated earth- rotation delta_lod_v_ref', fontsize=19, fontweight="bold")
+fig = plt.figure(11)
+ax = plt.axes(ylim=(-lod_lim, lod_lim))
+ax.plot(np.linspace(start=2005, stop=2015, num=len(delta_lod_v_ref)), delta_lod_v_ref, 'blue', lw=line_width)
+ax.set_xlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$\Delta$ LOD [s]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('$\Delta$ LOD', fontsize=19, fontweight="bold")
+
+# delta lod ref - delta lod
+delta_delta_lod = delta_lod_v_ref - delta_lod_v
+fig = plt.figure(12)
+ax = plt.axes(ylim=(-lod_lim, lod_lim))
+ax.plot(np.linspace(start=2005, stop=2015, num=len(delta_delta_lod)), delta_delta_lod, 'green', lw=line_width)
+ax.set_xlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_ylabel("$\Delta$ LOD [s]", fontsize=15, fontweight="bold", labelpad=10)
+ax.set_title('ref $\Delta$ $LOD_{Ref}$ - $\Delta$ $LOD_{Model}$', fontsize=19, fontweight="bold")
 
 plt.show()
-
-
-
