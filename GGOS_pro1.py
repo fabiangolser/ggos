@@ -162,12 +162,14 @@ class Data:
 test = Data()
 z = len(test.moon_)
 G = 6.674*10**(-11)
-if special_computation:
-    G = 6.674 * 10 ** (-11) / 2
-k_Re = 0.3077
-k_Im = 0.0036
 GM_sun = 1.32712442076*10**(20)
 GM_moon = 4.9027779*10**(12)
+if special_computation:
+    G = 6.674 * 10 ** (-11) / 2
+    GM_sun = 1.32712442076 * 10 ** (20) / 2
+    GM_moon = 4.9027779 * 10 ** (12) / 2
+k_Re = 0.3077
+k_Im = 0.0036
 M_earth = 5.9737*10**(24)
 R_earth = 6378136.6
 A_B_strich = 0.3296108 * M_earth * R_earth**2
@@ -400,6 +402,8 @@ if special_computation:
     # save special computation matrices, restore original values and rerun simulation
     w_v_g_half = w_v
     G = 6.674 * 10 ** (-11)
+    GM_sun = 1.32712442076 * 10 ** (20)
+    GM_moon = 4.9027779 * 10 ** (12)
 
 
 ########################################################################################################################
@@ -599,6 +603,8 @@ for index in range(z-1):
 ########################################################################################################################
 
 
+fileextention = '.pdf'
+#fileextention = '.png'
 # w
 polar_lim_x = (-0.5 * 10**-10, 1.5 * 10**-10)
 polar_lim_y = (-2 * 10**-10, -0.2 * 10**-10)
@@ -612,7 +618,7 @@ ax.set_xlabel("$\omega_x$ [rad/s * $10^{-10}$]" ,fontsize=15, fontweight="bold",
 ax.set_ylabel("$\omega_y$ [rad/s * $10^{-10}$]" ,fontsize=15, fontweight="bold", labelpad=10)
 ax.set_zlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_title('Simulated earth rotation', fontsize=19, fontweight="bold")
-fig.savefig("earth_rotation.pdf", bbox_inches='tight')
+fig.savefig("earth_rotation"+fileextention, bbox_inches='tight')
 
 # w ref
 earth_rot = earth_rot[1:len(earth_rot)-2]
@@ -623,7 +629,7 @@ ax.set_xlabel("$\omega_x$ [rad/s * $10^{-10}$]", fontsize=15, fontweight="bold",
 ax.set_ylabel("$\omega_y$ [rad/s * $10^{-10}$]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_zlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_title('ref earth rotation', fontsize=19, fontweight="bold")
-fig.savefig("earth_rotation_ref.pdf", bbox_inches='tight')
+fig.savefig("earth_rotation_ref"+fileextention, bbox_inches='tight')
 
 # w & w ref
 fig = plt.figure(3)
@@ -635,7 +641,8 @@ ax.set_ylabel("$\omega_y$ [rad/s * $10^{-10}$]", fontsize=15, fontweight="bold",
 ax.set_zlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_title('Comparison Simulated- and ref earth rotation', fontsize=19, fontweight="bold")
 plt.legend()
-fig.savefig("Comparison_simulated_earth_rotation_with_ref.pdf", bbox_inches='tight')
+fig.savefig("comparison_simulated_earth_rotation_with_ref"+fileextention, bbox_inches='tight')
+
 
 if special_computation:
     # w & w g_half
@@ -649,7 +656,11 @@ if special_computation:
     ax.set_zlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
     ax.set_title('Comparison simulated earth rotation with normal and half G', fontsize=19, fontweight="bold")
     plt.legend()
-    fig.savefig("Comparison_earth_rotation_with_normal_and_half_g.pdf", bbox_inches='tight')
+    fig.savefig("comparison_earth_rotation_with_normal_and_half_g.pdf", bbox_inches='tight')
+    for e in range(0, 95, 5):
+        for a in range(0, 95, 5):
+            ax.view_init(elev=e, azim=a)
+            fig.savefig("movie/movie_e{}_a{}{}".format(e, a, '.png'), dpi=200)
 
 
 # polar
@@ -662,7 +673,7 @@ ax.plot(polar_v[:, 0], polar_v[:, 1], 'red', lw=line_width_polar)
 ax.set_xlabel("$x_p$ [m]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_ylabel("$y_p$ [m]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_title('Simulated polar motion', fontsize=19, fontweight="bold")
-fig.savefig("polar_motion.pdf", bbox_inches='tight')
+fig.savefig("polar_motion"+fileextention, bbox_inches='tight')
 
 # polar ref
 polar_v_ref = polar_v_ref[1:len(polar_v_ref)-2]
@@ -672,7 +683,7 @@ ax.plot(polar_v_ref[:, 0], polar_v_ref[:, 1], 'blue', lw=line_width_polar)
 ax.set_xlabel("$x_p$ [m]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_ylabel("$y_p$ [m]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_title('ref polar motion', fontsize=19, fontweight="bold")
-fig.savefig("polar_motion_ref.pdf", bbox_inches='tight')
+fig.savefig("polar_motion_ref"+fileextention, bbox_inches='tight')
 
 
 # polar x & polar x ref
@@ -686,7 +697,7 @@ ax.set_xlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_ylabel("$x_p$ [m]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_title('polar motion comparison x', fontsize=19, fontweight="bold")
 plt.legend()
-fig.savefig("polar_motion_comparison_x.pdf", bbox_inches='tight')
+fig.savefig("polar_motion_comparison_x"+fileextention, bbox_inches='tight')
 
 # polar y & polar y ref
 fig = plt.figure(8)
@@ -697,7 +708,7 @@ ax.set_xlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_ylabel("$y_p$ [m]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_title('polar motion comparison y', fontsize=19, fontweight="bold")
 plt.legend()
-fig.savefig("polar_motion_comparison_y.pdf", bbox_inches='tight')
+fig.savefig("polar_motion_comparison_y"+fileextention, bbox_inches='tight')
 
 
 # delta_lod
@@ -710,7 +721,7 @@ ax.plot(np.linspace(start=2005, stop=2015, num=len(delta_lod_v)), delta_lod_v, '
 ax.set_xlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_ylabel("$\Delta$ LOD [s]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_title('Simulated $\Delta$ LOD', fontsize=19, fontweight="bold")
-fig.savefig("delta_lod_sim.pdf", bbox_inches='tight')
+fig.savefig("delta_lod_sim"+fileextention, bbox_inches='tight')
 
 # delta_lod ref
 delta_lod_v_ref = delta_lod_v_ref[1:len(delta_lod_v_ref)-2]
@@ -720,7 +731,7 @@ ax.plot(np.linspace(start=2005, stop=2015, num=len(delta_lod_v_ref)), delta_lod_
 ax.set_xlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_ylabel("$\Delta$ LOD [s]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_title('$\Delta$ LOD', fontsize=19, fontweight="bold")
-fig.savefig("delta_lod_ref.pdf", bbox_inches='tight')
+fig.savefig("delta_lod_ref"+fileextention, bbox_inches='tight')
 
 # delta lod ref - delta lod
 delta_delta_lod = delta_lod_v_ref - delta_lod_v
@@ -730,6 +741,6 @@ ax.plot(np.linspace(start=2005, stop=2015, num=len(delta_delta_lod)), delta_delt
 ax.set_xlabel("time [years]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_ylabel("$\Delta$ LOD [s]", fontsize=15, fontweight="bold", labelpad=10)
 ax.set_title('ref $\Delta$ $LOD_{Ref}$ - $\Delta$ $LOD_{Model}$', fontsize=19, fontweight="bold")
-fig.savefig("delta_lod_ref_minus_sim.pdf", bbox_inches='tight')
+fig.savefig("delta_lod_ref_minus_sim"+fileextention, bbox_inches='tight')
 
 plt.show()
